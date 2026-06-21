@@ -2003,6 +2003,7 @@ void ejecutar_submenu_visitantes(struct Parque *parque) {
                 return;
             case 3:
                 menu_modificar_visitante(parque);
+                return;
             case 0:
                 continuar = 0;
                 break;
@@ -2287,7 +2288,7 @@ void menu_comprar_entrada(struct NodoEntradas **entradas) {
         "                          ++ COMPRAR ENTRADA ++\n"
         "=========================================================================\n"
         " Para comprar una entrada y agregarla, rellene los siguientes parametros \n"
-        "                        in el orden que se indica.\n"
+        "                        en el orden que se indica.\n"
         "               Para volver atras y cancelar escriba 'volver'\n"
         "=========================================================================\n\n");
     printf(
@@ -2805,11 +2806,11 @@ void menu_modificar_visitante(struct Parque *parque) {
         "=========================================================================\n"
         "                       ++ MODIFICAR VISITANTE ++\n"
         "=========================================================================\n"
-        "  Para modificar los datos, rellene los siguientes parámetros en orden.\n"
-        "                 Para volver atrás y cancelar escriba 'volver'\n"
+        "  Para modificar los datos, rellene los siguientes parametros en orden.\n"
+        "                 Para volver atras y cancelar escriba 'volver'\n"
         "=========================================================================\n\n");
     printf(
-        "- INFORMACIÓN\n"
+        "- INFORMACION\n"
         "[1] Los parámetros son: ID Actual, Nuevo Nombre, Nueva Edad, Nueva Altura\n"
         "[2] Deben escribirse en conjunto y separados por un espacio\n"
         "[3] El nombre no debe contener espacios (use '_')\n"
