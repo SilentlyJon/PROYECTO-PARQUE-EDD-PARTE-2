@@ -4,4 +4,5 @@ project(PROYECTO_PARQUE_EDD_PARTE_2)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(PROYECTO_PARQUE_EDD_PARTE_2
-        main)
+        main.c
+        main.c)
