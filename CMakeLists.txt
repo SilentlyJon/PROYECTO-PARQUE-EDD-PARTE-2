@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.2)
+cmake_minimum_required(VERSION 4.1.2)
 project(PROYECTO_PARQUE_EDD_PARTE_2)
 
 set(CMAKE_CXX_STANDARD 14)
