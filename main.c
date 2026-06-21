@@ -42,6 +42,7 @@ void menu_eliminar_entrada(struct NodoEntradas **);
 void mostrar_submenu_visitantes(void);
 void menu_agregar_visitante(struct Parque *);
 void menu_eliminar_visitante(struct NodoVisitantes **);
+void menu_modificar_visitante(struct Parque *);
 void mostrar_submenu_filas(void);
 void menu_agregar_grupo_fila(struct Parque *);
 void menu_avanzar_fila_atraccion(struct NodoZonas *);
@@ -65,6 +66,7 @@ int total_personas_diario_parque(struct Parque *);
 int total_personas_dentro_parque(struct Parque *);
 int agregar_visitante(struct Parque *, struct Entrada *, char *, char *, int, float);
 int eliminar_visitante(struct NodoVisitantes **, int);
+int modificar_visitante(struct NodoVisitantes *, int, const char *, int, float);
 
 int agregar_grupo_fila(struct NodoVisitantes *, struct Atraccion *, int *, int, int);
 int vaciar_filas_atraccion(struct NodoZonas *, int);
@@ -1691,6 +1693,35 @@ int eliminar_visitante(struct NodoVisitantes **raiz_visitantes, int id) {
     return 0;
 }
 
+int modificar_visitante(struct NodoVisitantes *raiz, int id, const char *nuevo_nombre, int nueva_edad, float nueva_altura) {
+    struct Visitante *visitante_encontrado;
+    char *temp_nombre;
+
+
+    if (raiz == NULL) {
+        return -1;
+    }
+
+    visitante_encontrado = buscar_visitante_por_id(raiz, id);
+    if (visitante_encontrado == NULL) {
+        return -2;
+    }
+
+    temp_nombre = copiar_string(nuevo_nombre);
+    if (temp_nombre == NULL) {
+        return -3;
+    }
+
+    free(visitante_encontrado->nombre);
+    visitante_encontrado->nombre = temp_nombre;
+
+    visitante_encontrado->edad = nueva_edad;
+    visitante_encontrado->altura = nueva_altura;
+
+
+    return 0;
+}
+
 /*====================================
 -----------------ZONAS----------------
 ======================================*/
@@ -1970,6 +2001,8 @@ void ejecutar_submenu_visitantes(struct Parque *parque) {
             case 2:
                 menu_eliminar_visitante(&(parque->raiz_visitantes));
                 return;
+            case 3:
+                menu_modificar_visitante(parque);
             case 0:
                 continuar = 0;
                 break;
@@ -2533,7 +2566,8 @@ void mostrar_submenu_visitantes() {
         "=========================================================================\n\n");
     printf(
         "[1] Agregar Visitante al Parque\n"
-        "[2] Eliminar Visitante del Parque\n\n"
+        "[2] Eliminar Visitante del Parque\n"
+        "[3] Modificar Datos de Visitante \n\n"
 
         "=========================================================================\n\n"
 
@@ -2745,6 +2779,105 @@ void menu_eliminar_visitante(struct NodoVisitantes **raiz_visitantes) {
     }
 
     printf("\nPresione ENTER para regresar al menu principal...");
+    while (getchar() != '\n');
+}
+
+
+void menu_modificar_visitante(struct Parque *parque) {
+    char linea[256];
+    char token_control[40];
+    char nombre_buf[40];
+    char basura;
+
+    int id_buf;
+    int edad_buf;
+    float altura_buf;
+
+    int asignados;
+    int es_valido;
+    int resultado_logico;
+
+    es_valido = 0;
+
+    limpiar_pantalla();
+
+    printf(
+        "=========================================================================\n"
+        "                       ++ MODIFICAR VISITANTE ++\n"
+        "=========================================================================\n"
+        "  Para modificar los datos, rellene los siguientes parámetros en orden.\n"
+        "                 Para volver atrás y cancelar escriba 'volver'\n"
+        "=========================================================================\n\n");
+    printf(
+        "- INFORMACIÓN\n"
+        "[1] Los parámetros son: ID Actual, Nuevo Nombre, Nueva Edad, Nueva Altura\n"
+        "[2] Deben escribirse en conjunto y separados por un espacio\n"
+        "[3] El nombre no debe contener espacios (use '_')\n"
+        "Por ejemplo: '67 Carlos_Perez 30 1.75'\n\n"
+        "=========================================================================\n\n"
+    );
+
+    while (!es_valido) {
+        printf(">> ");
+
+        if (fgets(linea, (int)sizeof(linea), stdin) == NULL) {
+            printf("[ERROR] Error crítico al leer la entrada por teclado.\n\n");
+            continue;
+        }
+
+        if (sscanf(linea, "%39s", token_control) == 1) {
+            if (strcmp(token_control, "volver") == 0) {
+                return;
+            }
+        }
+
+        asignados = sscanf(linea, "%d %39s %d %f %c",
+                           &id_buf, nombre_buf, &edad_buf, &altura_buf, &basura);
+
+        if (asignados <= 0) {
+            printf("[ERROR] No se detectó ningún ingreso válido. Intente de nuevo.\n\n");
+            continue;
+        }
+
+        if (asignados < 4) {
+            printf("[ERROR] Datos incompletos. Faltan parámetros por ingresar.\n\n");
+            continue;
+        }
+
+        if (asignados > 4) {
+            printf("[ERROR] Entrada inválida. Escribió argumentos de más.\n\n");
+            continue;
+        }
+
+        if (id_buf <= 0 || edad_buf < 0 || edad_buf > 120 || altura_buf <= 0.40f || altura_buf > 2.50f) {
+            printf("[ERROR] Valores numéricos incoherentes. Verifique la ID, edad y altura.\n\n");
+            continue;
+        }
+
+        es_valido = 1;
+    }
+
+    resultado_logico = modificar_visitante(parque->raiz_visitantes, id_buf, nombre_buf, edad_buf, altura_buf);
+
+    switch (resultado_logico) {
+        case 0:
+            printf("[SISTEMA] ¡Datos del visitante ID %d actualizados exitosamente a '%s'!\n", id_buf, nombre_buf);
+            break;
+        case -1:
+            printf("[ERROR] El registro de visitantes está vacío.\n");
+            break;
+        case -2:
+            printf("[ERROR] No se encontró a ningún visitante registrado con la ID %d.\n", id_buf);
+            break;
+        case -3:
+            printf("[ERROR] Error de memoria del sistema.\n");
+            break;
+        default:
+            printf("[ALERTA] Operación rechazada. Código (%d).\n", resultado_logico);
+            break;
+    }
+
+    printf("\nPresione ENTER para regresar...");
     while (getchar() != '\n');
 }
 
