@@ -13,6 +13,7 @@ struct NodoEntradas;
 struct NodoZonas;
 struct NodoAtraccion;
 struct NodoFila;
+struct Parque;
 
 /* VARIABLES GLOBALES */
 int ENTRADA_GENERAL = 0;
@@ -20,80 +21,76 @@ int ENTRADA_INFANTIL = 0;
 int ENTRADA_FAMILIAR = 0;
 int ENTRADA_PRIORITARIA = 0;
 
-
 /* DECLARACION DE FUNCIONES */
 void limpiar_pantalla(void);
-char *copiar_string(const char *origen);
+char *copiar_string(const char *);
 struct Tiempo obtener_hora_actual(void);
 
-void ejecutar_submenu_entradas(struct NodoEntradas **entradas);
-void ejecutar_submenu_visitantes(struct Parque *parque);
-void ejecutar_submenu_filas(struct Parque *parque);
-void ejecutar_submenu_zonas(struct NodoZonas **head_zonas);
-void ejecutar_submenu_atracciones(struct NodoZonas *head_zonas);
+void ejecutar_submenu_entradas(struct NodoEntradas **);
+void ejecutar_submenu_visitantes(struct Parque *);
+void ejecutar_submenu_filas(struct Parque *);
+void ejecutar_submenu_zonas(struct NodoZonas **);
+void ejecutar_submenu_atracciones(struct NodoZonas *);
 
 int escoger_opcion(void);
-int menu_inicializar_parque(struct Parque *parque);
+int menu_inicializar_parque(struct Parque *);
 void mostrar_menu_principal(void);
 void mostrar_submenu_entradas(void);
-void menu_comprar_entrada(struct NodoEntradas **entradas);
-void menu_cambiar_estado_entrada(struct NodoEntradas **entradas);
-void menu_eliminar_entrada(struct NodoEntradas **entradas);
+void menu_comprar_entrada(struct NodoEntradas **);
+void menu_cambiar_estado_entrada(struct NodoEntradas **);
+void menu_eliminar_entrada(struct NodoEntradas **);
 void mostrar_submenu_visitantes(void);
-void menu_agregar_visitante(struct Parque *parque);
-void menu_eliminar_visitante(struct NodoVisitantes **raiz_visitantes);
+void menu_agregar_visitante(struct Parque *);
+void menu_eliminar_visitante(struct NodoVisitantes **);
 void mostrar_submenu_filas(void);
-void menu_agregar_grupo_fila(struct Parque *parque);
-void menu_avanzar_fila_atraccion(struct NodoZonas *head_zonas);
+void menu_agregar_grupo_fila(struct Parque *);
+void menu_avanzar_fila_atraccion(struct NodoZonas *);
 void mostrar_submenu_zonas(void);
-void menu_agregar_zona_al_parque(struct NodoZonas **head_zonas);
-void menu_eliminar_zona_del_parque(struct NodoZonas **head_zonas);
-void menu_agregar_o_remover_visitante_zona(struct NodoZonas *head_zonas);
+void menu_agregar_zona_al_parque(struct NodoZonas **);
+void menu_eliminar_zona_del_parque(struct NodoZonas **);
+void menu_agregar_o_remover_visitante_zona(struct NodoZonas *);
 void mostrar_submenu_atracciones(void);
-void menu_agregar_atraccion_zona(struct NodoZonas *head_zonas);
-void menu_eliminar_atraccion_zona(struct NodoZonas *head_zonas);
-void menu_mover_atraccion_distinta_zona(struct NodoZonas *head_zonas);
-void menu_modificar_estado_atraccion(struct NodoZonas *head_zonas);
+void menu_agregar_atraccion_zona(struct NodoZonas *);
+void menu_eliminar_atraccion_zona(struct NodoZonas *);
+void menu_mover_atraccion_distinta_zona(struct NodoZonas *);
+void menu_modificar_estado_atraccion(struct NodoZonas *);
 
-struct Zona *obtener_zona_por_id(struct NodoZonas *head_zonas, int id_zona);
-int agregar_zona(struct NodoZonas **head_zonas, const char *nombre, const char *tematica,
-                 int cap_max, int hora_apertura, int hora_cierre, int min_apertura,
-                 int min_cierre, int max_atracciones);
-int eliminar_zona(struct NodoZonas **head_zonas, int id);
-int agregar_o_remover_visitantes_zona(struct NodoZonas *head_zonas, int id, int visitantes);
+struct Zona *obtener_zona_por_id(struct NodoZonas *, int);
+int agregar_zona(struct NodoZonas **, const char *, const char *, int, int, int, int, int, int);
+int eliminar_zona(struct NodoZonas **, int);
+int agregar_o_remover_visitantes_zona(struct NodoZonas *, int, int);
 
-struct Visitante* buscar_visitante_por_id(struct NodoVisitantes *raiz, int id);
-int total_personas_diario_parque(struct Parque *parque);
-int total_personas_dentro_parque(struct Parque *parque);
-int agregar_visitante(struct Parque *parque, struct Entrada *entrada, char *nombre, char *rut, int edad, float altura);
-int eliminar_visitante(struct NodoVisitantes **raiz_visitantes, int id);
+struct Visitante* buscar_visitante_por_id(struct NodoVisitantes *, int);
+int total_personas_diario_parque(struct Parque *);
+int total_personas_dentro_parque(struct Parque *);
+int agregar_visitante(struct Parque *, struct Entrada *, char *, char *, int, float);
+int eliminar_visitante(struct NodoVisitantes **, int);
 
-int agregar_grupo_fila(struct NodoVisitantes *raiz_visitantes, struct Atraccion *atraccion, int *ids_grupo, int tam_grupo, int es_prioritaria);
-int vaciar_filas_atraccion(struct NodoZonas *head_zonas, int id_atraccion);
-int avanzar_fila_atraccion(struct NodoZonas *head_zonas, int id_atraccion);
+int agregar_grupo_fila(struct NodoVisitantes *, struct Atraccion *, int *, int, int);
+int vaciar_filas_atraccion(struct NodoZonas *, int);
+int avanzar_fila_atraccion(struct NodoZonas *, int);
 
-void ver_filas_atracciones(struct NodoZonas *head_zonas);
-void ver_entradas_compradas(struct NodoEntradas *head_entradas);
-void ver_visitantes_parque(struct NodoVisitantes *raiz_visitantes);
-void ver_zonas_actuales(struct NodoZonas *head_zonas);
-void ver_atracciones_actuales(struct NodoZonas *head_zonas);
-void ver_reporte_atracciones_actual(struct NodoZonas *head_zonas);
-void ver_reporte_general_dia(struct Parque *parque);
+void ver_filas_atracciones(struct NodoZonas *);
+void ver_entradas_compradas(struct NodoEntradas *);
+void ver_visitantes_parque(struct NodoVisitantes *);
+void ver_zonas_actuales(struct NodoZonas *);
+void ver_atracciones_actuales(struct NodoZonas *);
+void ver_reporte_atracciones_actual(struct NodoZonas *);
+void ver_reporte_general_dia(struct Parque *);
 
-struct Entrada *buscar_entrada_por_id(struct NodoEntradas *entradas, int id);
-int calcular_recaudacion_entradas(struct Parque *parque);
-int comprar_entrada(struct NodoEntradas **entradas, char *tipo, int valor);
-int cambiar_estado_entrada(struct NodoEntradas **entradas, int id_entrada, char *nuevo_estado);
-int eliminar_entrada(struct NodoEntradas **entradas, int id_entrada);
+struct Entrada *buscar_entrada_por_id(struct NodoEntradas *, int);
+int calcular_recaudacion_entradas(struct Parque *);
+int comprar_entrada(struct NodoEntradas **, char *, int);
+int cambiar_estado_entrada(struct NodoEntradas **, int, char *);
+int eliminar_entrada(struct NodoEntradas **, int);
 
-struct Atraccion *buscar_atraccion_por_id(struct NodoZonas *head_zonas, int id_atraccion);
-struct Atraccion *obtener_atraccion_mayor_pico(struct Parque *parque);
-struct Atraccion *obtener_atraccion_mas_visitada(struct Parque *parque);
-int agregar_atraccion(struct NodoZonas *head_zonas, struct Zona *zona, const char *nombre,
-                    const char *tematica, int duracion, int cap_max, int edad_min, float altura_min);
-int eliminar_atraccion(struct NodoZonas *head_zonas, int id_atraccion);
-int mover_atraccion(struct NodoZonas *head_zonas, struct Zona *zona_objetivo, int id_atraccion);
-int cambiar_estado_atraccion(struct NodoZonas *head_zonas, int id_atraccion, const char *nuevo_estado);
+struct Atraccion *buscar_atraccion_por_id(struct NodoZonas *, int);
+struct Atraccion *obtener_atraccion_mayor_pico(struct Parque *);
+struct Atraccion *obtener_atraccion_mas_visitada(struct Parque *);
+int agregar_atraccion(struct NodoZonas *, struct Zona *, const char *, const char *, int, int, int, float);
+int eliminar_atraccion(struct NodoZonas *, int);
+int mover_atraccion(struct NodoZonas *, struct Zona *, int);
+int cambiar_estado_atraccion(struct NodoZonas *, int, const char *);
 
 /* ========================================================================== */
 /* 2. ESTRUCTURAS INDEPENDIENTES Y HOJA */
@@ -3680,17 +3677,6 @@ void menu_modificar_estado_atraccion(struct NodoZonas *head_zonas) {
     while (getchar() != '\n');
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 ====================================
