@@ -1922,6 +1922,157 @@ int escoger_opcion(void) {
     }
 }
 
+void ejecutar_submenu_entradas(struct NodoEntradas **entradas) {
+    int sub_opcion;
+    int continuar;
+    continuar = 1;
+
+    while (continuar) {
+        limpiar_pantalla();
+        mostrar_submenu_entradas();
+        sub_opcion = escoger_opcion();
+
+        switch (sub_opcion) {
+            case 1:
+                menu_comprar_entrada(entradas);
+                return;
+            case 2:
+                menu_eliminar_entrada(entradas);
+                return;
+            case 3:
+                menu_cambiar_estado_entrada(entradas);
+                return;
+            case 0:
+                continuar = 0;
+                return;
+            default:
+                printf("\n[AVISO] Opcion inválida.\n");
+                printf("Presione ENTER para continuar...");
+                while (getchar() != '\n');
+        }
+    }
+}
+
+void ejecutar_submenu_visitantes(struct Parque *parque) {
+    int sub_opcion;
+    int continuar;
+    continuar = 1;
+
+    while (continuar) {
+        limpiar_pantalla();
+        mostrar_submenu_visitantes();
+        sub_opcion = escoger_opcion();
+
+        switch (sub_opcion) {
+            case 1:
+                menu_agregar_visitante(parque);
+                return;
+            case 2:
+                menu_eliminar_visitante(&(parque->raiz_visitantes));
+                return;
+            case 0:
+                continuar = 0;
+                break;
+            default:
+                printf("\n[AVISO] Opcion inválida.\n");
+                printf("Presione ENTER para continuar...");
+                while (getchar() != '\n');
+        }
+    }
+}
+
+void ejecutar_submenu_filas(struct Parque *parque) {
+    int sub_opcion;
+    int continuar;
+    continuar = 1;
+
+    while (continuar) {
+        limpiar_pantalla();
+        mostrar_submenu_filas();
+        sub_opcion = escoger_opcion();
+
+        switch (sub_opcion) {
+            case 1:
+                menu_agregar_grupo_fila(parque);
+                return;
+            case 2:
+                menu_avanzar_fila_atraccion(parque->head_zonas);
+                return;
+            case 0:
+                continuar = 0;
+                return;
+            default:
+                printf("\n[AVISO] Opcion inválida.\n");
+                printf("Presione ENTER para continuar...");
+                while (getchar() != '\n');
+        }
+    }
+}
+
+void ejecutar_submenu_zonas(struct NodoZonas **head_zonas) {
+    int sub_opcion;
+    int continuar;
+    continuar = 1;
+
+    while (continuar) {
+        limpiar_pantalla();
+        mostrar_submenu_zonas();
+        sub_opcion = escoger_opcion();
+
+        switch (sub_opcion) {
+            case 1:
+                menu_agregar_zona_al_parque(head_zonas);
+                return;
+            case 2:
+                menu_eliminar_zona_del_parque(head_zonas);
+                return;
+            case 3:
+                menu_agregar_o_remover_visitante_zona(*head_zonas);
+                return;
+            case 0:
+                continuar = 0;
+                break;
+            default:
+                printf("\n[AVISO] Opcion inválida.\n");
+                printf("Presione ENTER para continuar...");
+                while (getchar() != '\n');
+        }
+    }
+}
+
+void ejecutar_submenu_atracciones(struct NodoZonas *head_zonas) {
+    int sub_opcion;
+    int continuar;
+    continuar = 1;
+
+    while (continuar) {
+        limpiar_pantalla();
+        mostrar_submenu_atracciones();
+        sub_opcion = escoger_opcion();
+
+        switch (sub_opcion) {
+            case 1:
+                menu_agregar_atraccion_zona(head_zonas);
+                return;
+            case 2:
+                menu_eliminar_atraccion_zona(head_zonas);
+                return;
+            case 3:
+                menu_mover_atraccion_distinta_zona(head_zonas);
+                return;
+            case 4:
+                menu_modificar_estado_atraccion(head_zonas);
+                return;
+            case 0:
+                continuar = 0;
+                return;
+            default:
+                printf("\n[AVISO] Opcion inválida.\n");
+                printf("Presione ENTER para continuar...");
+                while (getchar() != '\n');
+        }
+    }
+}
 
 int menu_inicializar_parque(struct Parque *parque) {
     char linea[256];
@@ -3747,156 +3898,4 @@ int main(void) {
     }
 
     return 0;
-}
-
-void ejecutar_submenu_entradas(struct NodoEntradas **entradas) {
-    int sub_opcion;
-    int continuar;
-    continuar = 1;
-
-    while (continuar) {
-        limpiar_pantalla();
-        mostrar_submenu_entradas();
-        sub_opcion = escoger_opcion();
-
-        switch (sub_opcion) {
-            case 1:
-                menu_comprar_entrada(entradas);
-                return;
-            case 2:
-                menu_eliminar_entrada(entradas);
-                return;
-            case 3:
-                menu_cambiar_estado_entrada(entradas);
-                return;
-            case 0:
-                continuar = 0;
-                return;
-            default:
-                printf("\n[AVISO] Opcion inválida.\n");
-                printf("Presione ENTER para continuar...");
-                while (getchar() != '\n');
-        }
-    }
-}
-
-void ejecutar_submenu_visitantes(struct Parque *parque) {
-    int sub_opcion;
-    int continuar;
-    continuar = 1;
-
-    while (continuar) {
-        limpiar_pantalla();
-        mostrar_submenu_visitantes();
-        sub_opcion = escoger_opcion();
-
-        switch (sub_opcion) {
-            case 1:
-                menu_agregar_visitante(parque);
-                return;
-            case 2:
-                menu_eliminar_visitante(&(parque->raiz_visitantes));
-                return;
-            case 0:
-                continuar = 0;
-                break;
-            default:
-                printf("\n[AVISO] Opcion inválida.\n");
-                printf("Presione ENTER para continuar...");
-                while (getchar() != '\n');
-        }
-    }
-}
-
-void ejecutar_submenu_filas(struct Parque *parque) {
-    int sub_opcion;
-    int continuar;
-    continuar = 1;
-
-    while (continuar) {
-        limpiar_pantalla();
-        mostrar_submenu_filas();
-        sub_opcion = escoger_opcion();
-
-        switch (sub_opcion) {
-            case 1:
-                menu_agregar_grupo_fila(parque);
-                return;
-            case 2:
-                menu_avanzar_fila_atraccion(parque->head_zonas);
-                return;
-            case 0:
-                continuar = 0;
-                return;
-            default:
-                printf("\n[AVISO] Opcion inválida.\n");
-                printf("Presione ENTER para continuar...");
-                while (getchar() != '\n');
-        }
-    }
-}
-
-void ejecutar_submenu_zonas(struct NodoZonas **head_zonas) {
-    int sub_opcion;
-    int continuar;
-    continuar = 1;
-
-    while (continuar) {
-        limpiar_pantalla();
-        mostrar_submenu_zonas();
-        sub_opcion = escoger_opcion();
-
-        switch (sub_opcion) {
-            case 1:
-                menu_agregar_zona_al_parque(head_zonas);
-                return;
-            case 2:
-                menu_eliminar_zona_del_parque(head_zonas);
-                return;
-            case 3:
-                menu_agregar_o_remover_visitante_zona(*head_zonas);
-                return;
-            case 0:
-                continuar = 0;
-                break;
-            default:
-                printf("\n[AVISO] Opcion inválida.\n");
-                printf("Presione ENTER para continuar...");
-                while (getchar() != '\n');
-        }
-    }
-}
-
-void ejecutar_submenu_atracciones(struct NodoZonas *head_zonas) {
-    int sub_opcion;
-    int continuar;
-    continuar = 1;
-
-    while (continuar) {
-        limpiar_pantalla();
-        mostrar_submenu_atracciones();
-        sub_opcion = escoger_opcion();
-
-        switch (sub_opcion) {
-            case 1:
-                menu_agregar_atraccion_zona(head_zonas);
-                return;
-            case 2:
-                menu_eliminar_atraccion_zona(head_zonas);
-                return;
-            case 3:
-                menu_mover_atraccion_distinta_zona(head_zonas);
-                return;
-            case 4:
-                menu_modificar_estado_atraccion(head_zonas);
-                return;
-            case 0:
-                continuar = 0;
-                return;
-            default:
-                printf("\n[AVISO] Opcion inválida.\n");
-                printf("Presione ENTER para continuar...");
-                while (getchar() != '\n');
-        }
-    }
 }
