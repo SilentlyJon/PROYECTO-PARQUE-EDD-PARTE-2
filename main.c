@@ -20,6 +20,7 @@ int ENTRADA_GENERAL = 0;
 int ENTRADA_INFANTIL = 0;
 int ENTRADA_FAMILIAR = 0;
 int ENTRADA_PRIORITARIA = 0;
+int PEAK_VISITANTES = 0; /*agragada para contar visitantes totales del dia*/
 
 /* DECLARACION DE FUNCIONES */
 void limpiar_pantalla(void);
@@ -804,7 +805,7 @@ void ver_reporte_general_dia(struct Parque *parque) {
     printf("                      REPORTE GENERAL DIARIO DEL PARQUE\n");
     printf("=========================================================================\n\n");
     printf(" Flujo de Visitantes:\n");
-    printf("  - Total de visitas registradas hoy  : %d\n", total_visitantes);
+    printf("  - Total de visitas registradas hoy  : %d\n", PEAK_VISITANTES);
     printf("  - Personas activas dentro del parque: %d\n", total_dentro_parque);
     printf("-------------------------------------------------------------------------\n");
     printf(" Auditoria Financiera:\n");
@@ -1616,6 +1617,8 @@ int agregar_visitante(struct Parque *parque, struct Entrada *entrada, char *nomb
     }
 
     *enlace = nuevo_nodo;
+
+    PEAK_VISITANTES++;/* para contar los visitantes totales del dia*/
 
     return 0;
 }
@@ -3969,6 +3972,71 @@ void menu_modificar_estado_atraccion(struct NodoZonas *head_zonas) {
 ====================================
 */
 
+void cargar_datos_prueba(struct Parque *parque) {
+    struct Zona *zAventura, *zTerror;
+    struct Entrada *e1, *e2, *e3, *e4;
+    struct Atraccion *atr1, *atr2;
+    int id_g1[1], id_g2[1];
+
+    if (parque == NULL) return;
+
+    printf("\n[TEST] Generando entradas en el sistema...\n");
+    /* 1. Comprar Entradas (Esto genera IDs automáticos: 1, 2, 3, 4) */
+    comprar_entrada(&(parque->head_entradas), "general", ENTRADA_GENERAL);
+    comprar_entrada(&(parque->head_entradas), "infantil", ENTRADA_INFANTIL);
+    comprar_entrada(&(parque->head_entradas), "prioritaria", ENTRADA_PRIORITARIA);
+    comprar_entrada(&(parque->head_entradas), "prioritaria", ENTRADA_PRIORITARIA);
+
+    printf("[TEST] Creando zonas del parque...\n");
+    /* 2. Agregar Zonas (IDs generados: 1 y 2) */
+    /* Parametros: nombre, tematica, cap_max, h_ap, h_ci, m_ap, m_ci, max_atracciones */
+    agregar_zona(&(parque->head_zonas), "Valle_Aventura", "Aventura", 500, 9, 20, 0, 0, 5);
+    agregar_zona(&(parque->head_zonas), "Mansión_Terror", "Terror", 200, 10, 23, 0, 0, 3);
+
+    /* Recuperamos los punteros de las zonas para poder asignarles atracciones */
+    zAventura = obtener_zona_por_id(parque->head_zonas, 1);
+    zTerror = obtener_zona_por_id(parque->head_zonas, 2);
+
+    printf("[TEST] Instalando atracciones en las zonas...\n");
+    /* 3. Agregar Atracciones (IDs generados: 1 y 2) */
+    /* Parametros: head_zonas, zona, nombre, tematica, duracion, cap_max, edad_min, altura_min */
+    agregar_atraccion(parque->head_zonas, zAventura, "Montaña_Rusa_X", "Aventura", 3, 20, 12, 1.40f);
+    agregar_atraccion(parque->head_zonas, zTerror, "Casa_Clown", "Terror", 5, 10, 14, 1.20f);
+
+    /* Recuperamos los punteros de las entradas creadas para dárselas a los visitantes */
+    e1 = buscar_entrada_por_id(parque->head_entradas, 1);
+    e2 = buscar_entrada_por_id(parque->head_entradas, 2);
+    e3 = buscar_entrada_por_id(parque->head_entradas, 3);
+    e4 = buscar_entrada_por_id(parque->head_entradas, 4);
+
+    printf("[TEST] Registrando visitantes en el ABB...\n");
+    /* 4. Agregar Visitantes al Árbol (IDs generados automáticamente: 1, 2, 3, 4) */
+    /* Parametros: parque, entrada, nombre, rut, edad, altura */
+    agregar_visitante(parque, e1, "Gustavo_Torres", "20123456-7", 20, 1.75f);
+    agregar_visitante(parque, e2, "Pedrito_Gómez", "25876543-2", 10, 1.35f); // No entra a la montaña por altura
+    agregar_visitante(parque, e3, "Ana_Silva", "19456123-K", 23, 1.68f);      // Tiene entrada prioritaria
+    agregar_visitante(parque, e4, "Diego_Pérez", "22345678-9", 17, 1.82f);    // Tiene entrada prioritaria
+
+    printf("[TEST] Simulando aforo en las zonas...\n");
+    /* 5. Sumar personas al aforo de las zonas actuales */
+    agregar_o_remover_visitantes_zona(parque->head_zonas, 1, 3); // 3 personas en Aventura
+    agregar_o_remover_visitantes_zona(parque->head_zonas, 2, 1); // 1 persona en Terror
+
+    printf("[TEST] Colocando visitantes en las filas de espera...\n");
+    /* 6. Meter personas en las colas de las atracciones */
+    atr1 = buscar_atraccion_por_id(parque->head_zonas, 1); // Montaña Rusa
+
+    id_g1[0] = 1; // Gustavo (Entrada General)
+    agregar_grupo_fila(parque->raiz_visitantes, atr1, id_g1, 1, 0); // Fila General
+
+    id_g2[0] = 3; // Ana (Entrada Prioritaria)
+    agregar_grupo_fila(parque->raiz_visitantes, atr1, id_g2, 1, 1); // Fila Prioritaria
+
+    printf("[SISTEMA] ¡Base de datos de prueba cargada con éxito!\n");
+    printf("Presione ENTER para ir al menú...");
+    while (getchar() != '\n');
+}
+
 int main(void){
     struct Parque *parque = NULL;
     int opcion_principal;
@@ -3978,6 +4046,8 @@ int main(void){
 
     parque = (struct Parque *)malloc(sizeof(*parque));
     if (!menu_inicializar_parque(parque)) return -1;
+
+    cargar_datos_prueba(parque);
 
     while (continuar_programa) {
         limpiar_pantalla();
