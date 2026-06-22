@@ -63,9 +63,8 @@ int eliminar_zona(struct NodoZonas **, int);
 int agregar_o_remover_visitantes_zona(struct NodoZonas *, int, int);
 
 struct Visitante* buscar_visitante_por_id(struct NodoVisitantes *, int);
-int total_personas_diario_parque(struct Parque *);
 int total_personas_dentro_parque(struct Parque *);
-int agregar_visitante(struct Parque *, struct Entrada *, char *, char *, int, float);
+int agregar_visitante(struct Parque *, struct Entrada *, char *, char *, int, float, int*);
 int eliminar_visitante(struct NodoVisitantes **, int);
 int modificar_visitante(struct NodoVisitantes *, int, const char *, int, float);
 
@@ -90,7 +89,7 @@ int eliminar_entrada(struct NodoEntradas **, int);
 struct Atraccion *buscar_atraccion_por_id(struct NodoZonas *, int);
 struct Atraccion *obtener_atraccion_mayor_pico(struct Parque *);
 struct Atraccion *obtener_atraccion_mas_visitada(struct Parque *);
-int agregar_atraccion(struct NodoZonas *, struct Zona *, const char *, const char *, int, int, int, float);
+int agregar_atraccion(struct NodoZonas *, struct Zona *, const char *, const char *, int, int, int, float, int *);
 int eliminar_atraccion(struct NodoZonas *, int);
 int mover_atraccion(struct NodoZonas *, struct Zona *, int);
 int cambiar_estado_atraccion(struct NodoZonas *, int, const char *);
@@ -353,7 +352,7 @@ struct Atraccion *obtener_atraccion_mas_visitada(struct Parque *parque) {
 }
 
 int agregar_atraccion(struct NodoZonas *head_zonas, struct Zona *zona, const char *nombre,
-                      const char *tematica, int duracion, int cap_max, int edad_min, float altura_min) {
+                      const char *tematica, int duracion, int cap_max, int edad_min, float altura_min, int *id_atraccion) {
 
     int contador_atracciones;
     int nueva_id;
@@ -435,6 +434,7 @@ int agregar_atraccion(struct NodoZonas *head_zonas, struct Zona *zona, const cha
         return -4; /* ERROR MEMORIA */
     }
 
+    *id_atraccion = nueva_id;
     nueva_atraccion->id = nueva_id;
     nueva_atraccion->duracion = duracion;
     nueva_atraccion->cap_max = cap_max;
@@ -773,7 +773,7 @@ struct Entrada *buscar_entrada_por_id(struct NodoEntradas *head_entradas, int id
 void ver_reporte_general_dia(struct Parque *parque) {
     struct Atraccion *mayor_pico;
     struct Atraccion *mas_visitada;
-    int total_dentro_parque, total_visitantes, mayor_espera, recaudacion;
+    int total_dentro_parque, mayor_espera, recaudacion;
 
     limpiar_pantalla();
 
@@ -798,8 +798,6 @@ void ver_reporte_general_dia(struct Parque *parque) {
 
     recaudacion = calcular_recaudacion_entradas(parque);
     total_dentro_parque = total_personas_dentro_parque(parque);
-
-    total_visitantes = total_personas_diario_parque(parque);
 
     printf("=========================================================================\n");
     printf("                      REPORTE GENERAL DIARIO DEL PARQUE\n");
@@ -1501,24 +1499,6 @@ int contar_dentro_parque(struct NodoVisitantes *raiz) {
     return cuenta + contar_dentro_parque(raiz->izq) + contar_dentro_parque(raiz->der);
 }
 
-int contar_total_visitantes(struct NodoVisitantes *raiz) {
-    int cuenta;
-
-    if (raiz == NULL) {
-        return 0;
-    }
-
-    cuenta = (raiz->datos != NULL) ? 1 : 0;
-
-    return cuenta + contar_total_visitantes(raiz->izq) + contar_total_visitantes(raiz->der);
-}
-
-int total_personas_diario_parque(struct Parque *parque) {
-    if (parque == NULL) {
-        return 0;
-    }
-    return contar_total_visitantes(parque->raiz_visitantes);
-}
 
 int total_personas_dentro_parque(struct Parque *parque) {
     if (parque == NULL) {
@@ -1548,7 +1528,7 @@ static int id_existe_en_arbol(struct NodoVisitantes *raiz, int id) {
     return 0; /* ID libre */
 }
 
-int agregar_visitante(struct Parque *parque, struct Entrada *entrada, char *nombre, char *rut, int edad, float altura) {
+int agregar_visitante(struct Parque *parque, struct Entrada *entrada, char *nombre, char *rut, int edad, float altura, int *id_Visitante) {
     int nueva_id;
     struct NodoVisitantes **enlace;
     struct NodoVisitantes *nuevo_nodo;
@@ -1570,6 +1550,7 @@ int agregar_visitante(struct Parque *parque, struct Entrada *entrada, char *nomb
     while (id_existe_en_arbol(parque->raiz_visitantes, nueva_id)) {
         nueva_id++;
     }
+    *id_Visitante = nueva_id;
 
     nuevo_nodo = (struct NodoVisitantes *)malloc(sizeof(struct NodoVisitantes));
     nuevo_visitante = (struct Visitante *)malloc(sizeof(struct Visitante));
@@ -2279,6 +2260,7 @@ void menu_comprar_entrada(struct NodoEntradas **entradas) {
     int precio_base;
     int precio_ticket;
     int exitos;
+    int idEntrada;
 
     precio_base = 0;
     exitos = 0;
@@ -2369,6 +2351,7 @@ void menu_comprar_entrada(struct NodoEntradas **entradas) {
         precio_base = ENTRADA_PRIORITARIA;
     }
 
+    int idEntradas[cantidad_buf];
     for (i = 0; i < cantidad_buf; i++) {
         if (strcmp(tipo_buf, "familiar") == 0 && i > 0) {
             precio_ticket = 0;
@@ -2376,15 +2359,23 @@ void menu_comprar_entrada(struct NodoEntradas **entradas) {
             precio_ticket = precio_base;
         }
 
-        if (comprar_entrada(entradas, tipo_buf, precio_ticket)) {
+        idEntrada = comprar_entrada(entradas, tipo_buf, precio_ticket);
+        if (idEntrada) {
             exitos++;
+            idEntradas[i] = idEntrada;
         }
     }
 
     if (exitos == cantidad_buf) {
         printf("[SISTEMA] !%d entrada(s) de tipo '%s' registrada(s) y comprada(s) con exito!\n", exitos, tipo_buf);
+        for(i = 0; i < cantidad_buf; i++) {
+            printf("[ID Entrada] %d \n", idEntradas[i]);
+        }
     } else if (exitos > 0) {
         printf("[ALERTA] Operacion parcial: Solo se registraron %d de %d entradas solicitadas.\n", exitos, cantidad_buf);
+        for(i = 0; i < exitos; i++) {
+            printf("[ID Entrada] %d \n", idEntradas[i]);
+        }
     } else {
         printf("[ALERTA] El sistema rechazo la operacion de compra.\n");
     }
@@ -2588,6 +2579,7 @@ void menu_agregar_visitante(struct Parque *parque) {
     int edad_buf;
     float altura_buf;
     int id_entrada_buf;
+    int id_visitante;
 
     int asignados;
     int es_valido;
@@ -2663,11 +2655,12 @@ void menu_agregar_visitante(struct Parque *parque) {
         es_valido = 1;
     }
 
-    resultado_logico = agregar_visitante(parque, entrada_visitante, nombre_buf, rut_buf, edad_buf, altura_buf);
+    resultado_logico = agregar_visitante(parque, entrada_visitante, nombre_buf, rut_buf, edad_buf, altura_buf, &id_visitante);
 
     switch (resultado_logico) {
         case 0:
             printf("[SISTEMA] !Visitante '%s' registrado exitosamente con la entrada ID %d!\n", nombre_buf, id_entrada_buf);
+            printf("[SISTEMA] !ID de visitante: %d", id_visitante);
             break;
 
         case -1:
@@ -2814,7 +2807,7 @@ void menu_modificar_visitante(struct Parque *parque) {
         "=========================================================================\n\n");
     printf(
         "- INFORMACION\n"
-        "[1] Los parámetros son: ID Actual, Nuevo Nombre, Nueva Edad, Nueva Altura\n"
+        "[1] Los parametros son: ID Actual, Nuevo Nombre, Nueva Edad, Nueva Altura\n"
         "[2] Deben escribirse en conjunto y separados por un espacio\n"
         "[3] El nombre no debe contener espacios (use '_')\n"
         "Por ejemplo: '67 Carlos_Perez 30 1.75'\n\n"
@@ -3550,6 +3543,7 @@ void menu_agregar_atraccion_zona(struct NodoZonas *head_zonas) {
     char basura;
 
     int id_zona_buf;
+    int id_atraccion;
     int duracion_buf;
     int cap_max_buf;
     int edad_min_buf;
@@ -3631,11 +3625,12 @@ void menu_agregar_atraccion_zona(struct NodoZonas *head_zonas) {
     }
 
     resultado_logico = agregar_atraccion(head_zonas, zona_destino, nombre_buf, tematica_buf,
-                                         duracion_buf, cap_max_buf, edad_min_buf, altura_min_buf);
+                                         duracion_buf, cap_max_buf, edad_min_buf, altura_min_buf, &id_atraccion);
 
     switch (resultado_logico) {
         case 0:
             printf("[SISTEMA] !Atraccion '%s' agregada con exito a la zona ID %d!\n", nombre_buf, id_zona_buf);
+            printf("[SISTEMA] !ID de atraccion: %d", id_atraccion);
             break;
 
         case -2:
@@ -3972,71 +3967,6 @@ void menu_modificar_estado_atraccion(struct NodoZonas *head_zonas) {
 ====================================
 */
 
-void cargar_datos_prueba(struct Parque *parque) {
-    struct Zona *zAventura, *zTerror;
-    struct Entrada *e1, *e2, *e3, *e4;
-    struct Atraccion *atr1, *atr2;
-    int id_g1[1], id_g2[1];
-
-    if (parque == NULL) return;
-
-    printf("\n[TEST] Generando entradas en el sistema...\n");
-    /* 1. Comprar Entradas (Esto genera IDs automáticos: 1, 2, 3, 4) */
-    comprar_entrada(&(parque->head_entradas), "general", ENTRADA_GENERAL);
-    comprar_entrada(&(parque->head_entradas), "infantil", ENTRADA_INFANTIL);
-    comprar_entrada(&(parque->head_entradas), "prioritaria", ENTRADA_PRIORITARIA);
-    comprar_entrada(&(parque->head_entradas), "prioritaria", ENTRADA_PRIORITARIA);
-
-    printf("[TEST] Creando zonas del parque...\n");
-    /* 2. Agregar Zonas (IDs generados: 1 y 2) */
-    /* Parametros: nombre, tematica, cap_max, h_ap, h_ci, m_ap, m_ci, max_atracciones */
-    agregar_zona(&(parque->head_zonas), "Valle_Aventura", "Aventura", 500, 9, 20, 0, 0, 5);
-    agregar_zona(&(parque->head_zonas), "Mansión_Terror", "Terror", 200, 10, 23, 0, 0, 3);
-
-    /* Recuperamos los punteros de las zonas para poder asignarles atracciones */
-    zAventura = obtener_zona_por_id(parque->head_zonas, 1);
-    zTerror = obtener_zona_por_id(parque->head_zonas, 2);
-
-    printf("[TEST] Instalando atracciones en las zonas...\n");
-    /* 3. Agregar Atracciones (IDs generados: 1 y 2) */
-    /* Parametros: head_zonas, zona, nombre, tematica, duracion, cap_max, edad_min, altura_min */
-    agregar_atraccion(parque->head_zonas, zAventura, "Montaña_Rusa_X", "Aventura", 3, 20, 12, 1.40f);
-    agregar_atraccion(parque->head_zonas, zTerror, "Casa_Clown", "Terror", 5, 10, 14, 1.20f);
-
-    /* Recuperamos los punteros de las entradas creadas para dárselas a los visitantes */
-    e1 = buscar_entrada_por_id(parque->head_entradas, 1);
-    e2 = buscar_entrada_por_id(parque->head_entradas, 2);
-    e3 = buscar_entrada_por_id(parque->head_entradas, 3);
-    e4 = buscar_entrada_por_id(parque->head_entradas, 4);
-
-    printf("[TEST] Registrando visitantes en el ABB...\n");
-    /* 4. Agregar Visitantes al Árbol (IDs generados automáticamente: 1, 2, 3, 4) */
-    /* Parametros: parque, entrada, nombre, rut, edad, altura */
-    agregar_visitante(parque, e1, "Gustavo_Torres", "20123456-7", 20, 1.75f);
-    agregar_visitante(parque, e2, "Pedrito_Gómez", "25876543-2", 10, 1.35f); // No entra a la montaña por altura
-    agregar_visitante(parque, e3, "Ana_Silva", "19456123-K", 23, 1.68f);      // Tiene entrada prioritaria
-    agregar_visitante(parque, e4, "Diego_Pérez", "22345678-9", 17, 1.82f);    // Tiene entrada prioritaria
-
-    printf("[TEST] Simulando aforo en las zonas...\n");
-    /* 5. Sumar personas al aforo de las zonas actuales */
-    agregar_o_remover_visitantes_zona(parque->head_zonas, 1, 3); // 3 personas en Aventura
-    agregar_o_remover_visitantes_zona(parque->head_zonas, 2, 1); // 1 persona en Terror
-
-    printf("[TEST] Colocando visitantes en las filas de espera...\n");
-    /* 6. Meter personas en las colas de las atracciones */
-    atr1 = buscar_atraccion_por_id(parque->head_zonas, 1); // Montaña Rusa
-
-    id_g1[0] = 1; // Gustavo (Entrada General)
-    agregar_grupo_fila(parque->raiz_visitantes, atr1, id_g1, 1, 0); // Fila General
-
-    id_g2[0] = 3; // Ana (Entrada Prioritaria)
-    agregar_grupo_fila(parque->raiz_visitantes, atr1, id_g2, 1, 1); // Fila Prioritaria
-
-    printf("[SISTEMA] ¡Base de datos de prueba cargada con éxito!\n");
-    printf("Presione ENTER para ir al menú...");
-    while (getchar() != '\n');
-}
-
 int main(void){
     struct Parque *parque = NULL;
     int opcion_principal;
@@ -4046,8 +3976,6 @@ int main(void){
 
     parque = (struct Parque *)malloc(sizeof(*parque));
     if (!menu_inicializar_parque(parque)) return -1;
-
-    cargar_datos_prueba(parque);
 
     while (continuar_programa) {
         limpiar_pantalla();
